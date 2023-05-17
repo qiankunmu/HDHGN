@@ -1,0 +1,11 @@
+ipython==8.5.0
+javalang==0.13.0
+matplotlib==3.6.1
+numpy==1.23.4
+openpyxl==3.0.10
+scikit_learn==1.1.2
+torch==1.10.0+cu113
+torch_geometric==2.1.0.post1
+torch_scatter==2.0.9
+tqdm==4.64.1
+XlsxWriter==3.0.3

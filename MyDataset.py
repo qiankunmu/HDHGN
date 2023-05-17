@@ -12,11 +12,7 @@ class HDHGData(Data):
         super(HDHGData, self).__init__(x, edge_types=edge_types, **kwargs)
 
     def __inc__(self, key, value, *args, **kwargs):
-        if key == 'edge_in_indexs':
-            return torch.tensor([[self.x.size(0)], [self.edge_types.size(0)]])
-        elif key == 'edge_out_indexs':
-            return torch.tensor([[self.edge_types.size(0)], [self.x.size(0)]])
-        elif key == 'edge_in_out_indexs':
+        if key == 'edge_in_out_indexs':
             return torch.tensor([[self.edge_types.size(0)], [self.x.size(0)]])
         else:
             return super().__inc__(key, value, *args, **kwargs)
@@ -46,7 +42,7 @@ class HDHGNDataset(Dataset):
             code = file.read()
 
             root = ast.parse(code)
-            index, edge_index, types, features, edge_types, edge_in_indexs_s, edge_in_indexs_t, edge_out_indexs_s, edge_out_indexs_t, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail = pre_walk_tree(
+            index, edge_index, types, features, edge_types, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail = pre_walk_tree(
                 root, 0, 0)
             types_encoded = [self.vocab.vocab["types"].word2id[t] for t in types]
             types_encoded = torch.tensor(types_encoded, dtype=torch.long)
@@ -54,14 +50,11 @@ class HDHGNDataset(Dataset):
             features_encoded = torch.tensor(features_encoded, dtype=torch.long)
             edge_types_encoded = [self.vocab.vocab["edge_types"].word2id.get(e, 1) for e in edge_types]
             edge_types_encoded = torch.tensor(edge_types_encoded, dtype=torch.long)
-            edge_in_indexs_encoded = torch.tensor([edge_in_indexs_s, edge_in_indexs_t], dtype=torch.long)
-            edge_out_indexs_encoded = torch.tensor([edge_out_indexs_s, edge_out_indexs_t], dtype=torch.long)
             edge_in_out_indexs_encoded = torch.tensor([edge_in_out_indexs_s, edge_in_out_indexs_t], dtype=torch.long)
             edge_in_out_head_tail_encoded = torch.tensor(edge_in_out_head_tail, dtype=torch.long)
             labels = torch.tensor([self.vocab.vocab["labels"].word2id[file_path[34:40]]], dtype=torch.long)
 
             d = HDHGData(x=features_encoded, types=types_encoded, edge_types=edge_types_encoded,
-                         edge_in_indexs=edge_in_indexs_encoded, edge_out_indexs=edge_out_indexs_encoded,
                          edge_in_out_indexs=edge_in_out_indexs_encoded,
                          edge_in_out_head_tail=edge_in_out_head_tail_encoded, labels=labels)
 
@@ -100,7 +93,7 @@ class HDHGNDataset_java(Dataset):
             code = file.read()
 
             root = javalang.parse.parse(code)
-            index, edge_index, types, features, edge_types, edge_in_indexs_s, edge_in_indexs_t, edge_out_indexs_s, edge_out_indexs_t, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail = pre_walk_tree_java(
+            index, edge_index, types, features, edge_types, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail = pre_walk_tree_java(
                 root, 0, 0)
             types_encoded = [self.vocab.vocab["types"].word2id[t] for t in types]
             types_encoded = torch.tensor(types_encoded, dtype=torch.long)
@@ -108,14 +101,11 @@ class HDHGNDataset_java(Dataset):
             features_encoded = torch.tensor(features_encoded, dtype=torch.long)
             edge_types_encoded = [self.vocab.vocab["edge_types"].word2id.get(e, 1) for e in edge_types]
             edge_types_encoded = torch.tensor(edge_types_encoded, dtype=torch.long)
-            edge_in_indexs_encoded = torch.tensor([edge_in_indexs_s, edge_in_indexs_t], dtype=torch.long)
-            edge_out_indexs_encoded = torch.tensor([edge_out_indexs_s, edge_out_indexs_t], dtype=torch.long)
             edge_in_out_indexs_encoded = torch.tensor([edge_in_out_indexs_s, edge_in_out_indexs_t], dtype=torch.long)
             edge_in_out_head_tail_encoded = torch.tensor(edge_in_out_head_tail, dtype=torch.long)
             labels = torch.tensor([self.vocab.vocab["labels"].word2id[file_path[32:38]]], dtype=torch.long)
 
             d = HDHGData(x=features_encoded, types=types_encoded, edge_types=edge_types_encoded,
-                         edge_in_indexs=edge_in_indexs_encoded, edge_out_indexs=edge_out_indexs_encoded,
                          edge_in_out_indexs=edge_in_out_indexs_encoded,
                          edge_in_out_head_tail=edge_in_out_head_tail_encoded, labels=labels)
 

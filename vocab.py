@@ -39,7 +39,7 @@ class Vocab:
             code = file.read()
             try:
                 root = ast.parse(code)
-                index, edge_index, types, features, edge_types, edge_in_indexs_s, edge_in_indexs_t, edge_out_indexs_s, edge_out_indexs_t, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail = pre_walk_tree(
+                index, edge_index, types, features, edge_types, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail = pre_walk_tree(
                     root, 0, 0)
                 for (type, feature) in zip(types, features):
                     if type in tokens:
@@ -77,7 +77,7 @@ class Vocab:
             code = file.read()
             try:
                 root = javalang.parse.parse(code)
-                index, edge_index, types, features, edge_types, edge_in_indexs_s, edge_in_indexs_t, edge_out_indexs_s, edge_out_indexs_t, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail = pre_walk_tree_java(
+                index, edge_index, types, features, edge_types, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail = pre_walk_tree_java(
                     root, 0, 0)
                 for (type, feature) in zip(types, features):
                     if type in tokens:
@@ -118,8 +118,10 @@ class Vocab:
 
 
 def main():
+    print("start building vocab for python")
     v = Vocab.build_for_ast("data/train_files_paths.txt")
     v.save("data/vocab4ast.json")
+    print("start building vocab for java")
     v2 = Vocab.build_for_ast_java("data/train_files_paths_java.txt")
     v2.save("data/vocab4ast_java.json")
     print("finish")

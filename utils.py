@@ -42,8 +42,6 @@ def pre_walk_tree(node, index, edge_index):
     types = []
     features = []
     edge_types = []
-    edge_in_indexs_s, edge_in_indexs_t = [], []
-    edge_out_indexs_s, edge_out_indexs_t = [], []
     edge_in_out_indexs_s, edge_in_out_indexs_t = [], []
     edge_in_out_head_tail = []
 
@@ -55,66 +53,46 @@ def pre_walk_tree(node, index, edge_index):
     for field_name, field in ast.iter_fields(node):
         if isinstance(field, ast.AST):
             edge_types.append(field_name)
-            edge_in_indexs_s.append(child_index)
-            edge_in_indexs_t.append(edge_index)
-            edge_out_indexs_s.append(edge_index)
-            edge_out_indexs_t.append(index)
             edge_in_out_indexs_s.extend([edge_index, edge_index])
             edge_in_out_indexs_t.extend([index, child_index])
             edge_in_out_head_tail.extend([0, 1])
             child_edge_index = edge_index + 1
-            child_index, child_edge_index, child_types, child_features, child_edge_types, child_edge_in_indexs_s, child_edge_in_indexs_t, child_edge_out_indexs_s, child_edge_out_indexs_t, child_edge_in_out_indexs_s, child_edge_in_out_indexs_t, child_edge_in_out_head_tail = pre_walk_tree(
+            child_index, child_edge_index, child_types, child_features, child_edge_types, child_edge_in_out_indexs_s, child_edge_in_out_indexs_t, child_edge_in_out_head_tail = pre_walk_tree(
                 field, child_index, child_edge_index)
             types.extend(child_types)
             features.extend(child_features)
             edge_types.extend(child_edge_types)
-            edge_in_indexs_s.extend(child_edge_in_indexs_s)
-            edge_in_indexs_t.extend(child_edge_in_indexs_t)
-            edge_out_indexs_s.extend(child_edge_out_indexs_s)
-            edge_out_indexs_t.extend(child_edge_out_indexs_t)
             edge_in_out_indexs_s.extend(child_edge_in_out_indexs_s)
             edge_in_out_indexs_t.extend(child_edge_in_out_indexs_t)
             edge_in_out_head_tail.extend(child_edge_in_out_head_tail)
             edge_index = child_edge_index
         elif isinstance(field, list) and field and isinstance(field[0], ast.AST):
             edge_types.append(field_name)
-            edge_out_indexs_s.append(edge_index)
-            edge_out_indexs_t.append(index)
             edge_in_out_indexs_s.append(edge_index)
             edge_in_out_indexs_t.append(index)
             edge_in_out_head_tail.append(0)
             child_edge_index = edge_index + 1
             for item in field:
-                edge_in_indexs_s.append(child_index)
-                edge_in_indexs_t.append(edge_index)
                 edge_in_out_indexs_s.append(edge_index)
                 edge_in_out_indexs_t.append(child_index)
                 edge_in_out_head_tail.append(1)
-                child_index, child_edge_index, child_types, child_features, child_edge_types, child_edge_in_indexs_s, child_edge_in_indexs_t, child_edge_out_indexs_s, child_edge_out_indexs_t, child_edge_in_out_indexs_s, child_edge_in_out_indexs_t, child_edge_in_out_head_tail = pre_walk_tree(
+                child_index, child_edge_index, child_types, child_features, child_edge_types, child_edge_in_out_indexs_s, child_edge_in_out_indexs_t, child_edge_in_out_head_tail = pre_walk_tree(
                     item, child_index, child_edge_index)
                 types.extend(child_types)
                 features.extend(child_features)
                 edge_types.extend(child_edge_types)
-                edge_in_indexs_s.extend(child_edge_in_indexs_s)
-                edge_in_indexs_t.extend(child_edge_in_indexs_t)
-                edge_out_indexs_s.extend(child_edge_out_indexs_s)
-                edge_out_indexs_t.extend(child_edge_out_indexs_t)
                 edge_in_out_indexs_s.extend(child_edge_in_out_indexs_s)
                 edge_in_out_indexs_t.extend(child_edge_in_out_indexs_t)
                 edge_in_out_head_tail.extend(child_edge_in_out_head_tail)
             edge_index = child_edge_index
         elif isinstance(field, list) and field:
             edge_types.append(field_name)
-            edge_out_indexs_s.append(edge_index)
-            edge_out_indexs_t.append(index)
             edge_in_out_indexs_s.append(edge_index)
             edge_in_out_indexs_t.append(index)
             edge_in_out_head_tail.append(0)
             for item in field:
                 types.append("ident")
                 features.append(str(item))
-                edge_in_indexs_s.append(child_index)
-                edge_in_indexs_t.append(edge_index)
                 edge_in_out_indexs_s.append(edge_index)
                 edge_in_out_indexs_t.append(child_index)
                 edge_in_out_head_tail.append(1)
@@ -122,29 +100,23 @@ def pre_walk_tree(node, index, edge_index):
             edge_index += 1
         elif field:
             edge_types.append(field_name)
-            edge_out_indexs_s.append(edge_index)
-            edge_out_indexs_t.append(index)
             edge_in_out_indexs_s.append(edge_index)
             edge_in_out_indexs_t.append(index)
             edge_in_out_head_tail.append(0)
             types.append("ident")
             features.append(str(field))
-            edge_in_indexs_s.append(child_index)
-            edge_in_indexs_t.append(edge_index)
             edge_in_out_indexs_s.append(edge_index)
             edge_in_out_indexs_t.append(child_index)
             edge_in_out_head_tail.append(1)
             child_index += 1
             edge_index += 1
 
-    return child_index, edge_index, types, features, edge_types, edge_in_indexs_s, edge_in_indexs_t, edge_out_indexs_s, edge_out_indexs_t, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail
+    return child_index, edge_index, types, features, edge_types, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail
 
 def pre_walk_tree_java(node, index, edge_index):
     types = []
     features = []
     edge_types = []
-    edge_in_indexs_s, edge_in_indexs_t = [], []
-    edge_out_indexs_s, edge_out_indexs_t = [], []
     edge_in_out_indexs_s, edge_in_out_indexs_t = [], []
     edge_in_out_head_tail = []
 
@@ -157,86 +129,60 @@ def pre_walk_tree_java(node, index, edge_index):
         field = getattr(node, field_name)
         if isinstance(field, javalang.ast.Node):
             edge_types.append(field_name)
-            edge_in_indexs_s.append(child_index)
-            edge_in_indexs_t.append(edge_index)
-            edge_out_indexs_s.append(edge_index)
-            edge_out_indexs_t.append(index)
             edge_in_out_indexs_s.extend([edge_index, edge_index])
             edge_in_out_indexs_t.extend([index, child_index])
             edge_in_out_head_tail.extend([0, 1])
             child_edge_index = edge_index + 1
-            child_index, child_edge_index, child_types, child_features, child_edge_types, child_edge_in_indexs_s, child_edge_in_indexs_t, child_edge_out_indexs_s, child_edge_out_indexs_t, child_edge_in_out_indexs_s, child_edge_in_out_indexs_t, child_edge_in_out_head_tail = pre_walk_tree_java(
+            child_index, child_edge_index, child_types, child_features, child_edge_types, child_edge_in_out_indexs_s, child_edge_in_out_indexs_t, child_edge_in_out_head_tail = pre_walk_tree_java(
                 field, child_index, child_edge_index)
             types.extend(child_types)
             features.extend(child_features)
             edge_types.extend(child_edge_types)
-            edge_in_indexs_s.extend(child_edge_in_indexs_s)
-            edge_in_indexs_t.extend(child_edge_in_indexs_t)
-            edge_out_indexs_s.extend(child_edge_out_indexs_s)
-            edge_out_indexs_t.extend(child_edge_out_indexs_t)
             edge_in_out_indexs_s.extend(child_edge_in_out_indexs_s)
             edge_in_out_indexs_t.extend(child_edge_in_out_indexs_t)
             edge_in_out_head_tail.extend(child_edge_in_out_head_tail)
             edge_index = child_edge_index
         elif isinstance(field, (list, tuple)) and field and isinstance(field[0], javalang.ast.Node):
             edge_types.append(field_name)
-            edge_out_indexs_s.append(edge_index)
-            edge_out_indexs_t.append(index)
             edge_in_out_indexs_s.append(edge_index)
             edge_in_out_indexs_t.append(index)
             edge_in_out_head_tail.append(0)
             child_edge_index = edge_index + 1
             for item in field:
                 if isinstance(item, javalang.ast.Node):
-                    edge_in_indexs_s.append(child_index)
-                    edge_in_indexs_t.append(edge_index)
                     edge_in_out_indexs_s.append(edge_index)
                     edge_in_out_indexs_t.append(child_index)
                     edge_in_out_head_tail.append(1)
-                    child_index, child_edge_index, child_types, child_features, child_edge_types, child_edge_in_indexs_s, child_edge_in_indexs_t, child_edge_out_indexs_s, child_edge_out_indexs_t, child_edge_in_out_indexs_s, child_edge_in_out_indexs_t, child_edge_in_out_head_tail = pre_walk_tree_java(
+                    child_index, child_edge_index, child_types, child_features, child_edge_types, child_edge_in_out_indexs_s, child_edge_in_out_indexs_t, child_edge_in_out_head_tail = pre_walk_tree_java(
                         item, child_index, child_edge_index)
                     types.extend(child_types)
                     features.extend(child_features)
                     edge_types.extend(child_edge_types)
-                    edge_in_indexs_s.extend(child_edge_in_indexs_s)
-                    edge_in_indexs_t.extend(child_edge_in_indexs_t)
-                    edge_out_indexs_s.extend(child_edge_out_indexs_s)
-                    edge_out_indexs_t.extend(child_edge_out_indexs_t)
                     edge_in_out_indexs_s.extend(child_edge_in_out_indexs_s)
                     edge_in_out_indexs_t.extend(child_edge_in_out_indexs_t)
                     edge_in_out_head_tail.extend(child_edge_in_out_head_tail)
                 elif isinstance(item, (list, tuple)):
                     for it in item:
-                        edge_in_indexs_s.append(child_index)
-                        edge_in_indexs_t.append(edge_index)
                         edge_in_out_indexs_s.append(edge_index)
                         edge_in_out_indexs_t.append(child_index)
                         edge_in_out_head_tail.append(1)
-                        child_index, child_edge_index, child_types, child_features, child_edge_types, child_edge_in_indexs_s, child_edge_in_indexs_t, child_edge_out_indexs_s, child_edge_out_indexs_t, child_edge_in_out_indexs_s, child_edge_in_out_indexs_t, child_edge_in_out_head_tail = pre_walk_tree_java(
+                        child_index, child_edge_index, child_types, child_features, child_edge_types, child_edge_in_out_indexs_s, child_edge_in_out_indexs_t, child_edge_in_out_head_tail = pre_walk_tree_java(
                             it, child_index, child_edge_index)
                         types.extend(child_types)
                         features.extend(child_features)
                         edge_types.extend(child_edge_types)
-                        edge_in_indexs_s.extend(child_edge_in_indexs_s)
-                        edge_in_indexs_t.extend(child_edge_in_indexs_t)
-                        edge_out_indexs_s.extend(child_edge_out_indexs_s)
-                        edge_out_indexs_t.extend(child_edge_out_indexs_t)
                         edge_in_out_indexs_s.extend(child_edge_in_out_indexs_s)
                         edge_in_out_indexs_t.extend(child_edge_in_out_indexs_t)
                         edge_in_out_head_tail.extend(child_edge_in_out_head_tail)
             edge_index = child_edge_index
         elif isinstance(field, (list, tuple)) and field and field[0] and not isinstance(field[0], list):
             edge_types.append(field_name)
-            edge_out_indexs_s.append(edge_index)
-            edge_out_indexs_t.append(index)
             edge_in_out_indexs_s.append(edge_index)
             edge_in_out_indexs_t.append(index)
             edge_in_out_head_tail.append(0)
             for item in field:
                 types.append("ident")
                 features.append(str(item))
-                edge_in_indexs_s.append(child_index)
-                edge_in_indexs_t.append(edge_index)
                 edge_in_out_indexs_s.append(edge_index)
                 edge_in_out_indexs_t.append(child_index)
                 edge_in_out_head_tail.append(1)
@@ -244,16 +190,12 @@ def pre_walk_tree_java(node, index, edge_index):
             edge_index += 1
         elif isinstance(field, set) and field:
             edge_types.append(field_name)
-            edge_out_indexs_s.append(edge_index)
-            edge_out_indexs_t.append(index)
             edge_in_out_indexs_s.append(edge_index)
             edge_in_out_indexs_t.append(index)
             edge_in_out_head_tail.append(0)
             for item in field:
                 types.append("ident")
                 features.append(str(item))
-                edge_in_indexs_s.append(child_index)
-                edge_in_indexs_t.append(edge_index)
                 edge_in_out_indexs_s.append(edge_index)
                 edge_in_out_indexs_t.append(child_index)
                 edge_in_out_head_tail.append(1)
@@ -261,19 +203,15 @@ def pre_walk_tree_java(node, index, edge_index):
             edge_index += 1
         elif field:
             edge_types.append(field_name)
-            edge_out_indexs_s.append(edge_index)
-            edge_out_indexs_t.append(index)
             edge_in_out_indexs_s.append(edge_index)
             edge_in_out_indexs_t.append(index)
             edge_in_out_head_tail.append(0)
             types.append("ident")
             features.append(str(field))
-            edge_in_indexs_s.append(child_index)
-            edge_in_indexs_t.append(edge_index)
             edge_in_out_indexs_s.append(edge_index)
             edge_in_out_indexs_t.append(child_index)
             edge_in_out_head_tail.append(1)
             child_index += 1
             edge_index += 1
 
-    return child_index, edge_index, types, features, edge_types, edge_in_indexs_s, edge_in_indexs_t, edge_out_indexs_s, edge_out_indexs_t, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail
+    return child_index, edge_index, types, features, edge_types, edge_in_out_indexs_s, edge_in_out_indexs_t, edge_in_out_head_tail

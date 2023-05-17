@@ -87,5 +87,7 @@ def splitdata_java():
     print("finish")
 
 if __name__ == '__main__':
+    print("start spliting python data")
     splitdata()
+    print("start spliting java data")
     splitdata_java()
