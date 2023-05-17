@@ -25,7 +25,7 @@ def main():
     test_dataset = HDHGNDataset("../data/test", "../data/test_files_paths.txt", v)
     test_dataloader = DataLoader(test_dataset, batch_size=256, shuffle=False)
 
-    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     num_types = len(v.vocab["types"].word2id)
     vocab_sizes = [len(v.vocab[t].word2id) for t in v.vocab["types"].word2id]
     edge_vocab_size = len(v.vocab["edge_types"].word2id)
