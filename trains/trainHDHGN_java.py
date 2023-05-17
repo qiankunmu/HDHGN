@@ -25,7 +25,7 @@ def main():
     test_dataset = HDHGNDataset_java("../data/test_java", "../data/test_files_paths_java.txt", v)
     test_dataloader = DataLoader(test_dataset, batch_size=256, shuffle=False)
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
     num_types = len(v.vocab["types"].word2id)
     vocab_sizes = [len(v.vocab[t].word2id) for t in v.vocab["types"].word2id]
     edge_vocab_size = len(v.vocab["edge_types"].word2id)
@@ -35,7 +35,7 @@ def main():
     num_edge_heads = 8
     num_node_heads = 8
     num_heads = 8
-    feed_sizes = [dim_size, 512, len(v.vocab["labels"].word2id)]
+    feed_sizes = [dim_size, 1024, len(v.vocab["labels"].word2id)]
     dropout_rate = 0.2
 
     model_name = "HDHGN_java"
@@ -50,11 +50,12 @@ def main():
     model_save_path = result_save_path + model_name + ".pt"
 
     model = HDHGN(num_types, vocab_sizes, edge_vocab_size, embed_size, dim_size, num_layers, num_edge_heads,
-                     num_node_heads, num_heads, feed_sizes, dropout_rate)
+                  num_node_heads, num_heads, feed_sizes, dropout_rate)
     model = model.to(device)
     loss_function = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=5e-5)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", factor=0.1, patience=1, verbose=True, eps=1e-12)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", factor=0.1, patience=1, verbose=True,
+                                                           eps=1e-12)
 
     num_epochs = 50
     max_attk, attk = 5, 0
@@ -67,14 +68,14 @@ def main():
         i = 0
         for i, batch_data in enumerate(dataloader):
             batch_data = batch_data.to(device)
-            output = model(batch_data.x, batch_data.types, batch_data.edge_types, batch_data.edge_in_indexs,
-                           batch_data.edge_out_indexs, batch_data.edge_in_out_indexs, batch_data.edge_in_out_head_tail, batch_data.batch)
+            output = model(batch_data.x, batch_data.types, batch_data.edge_types, batch_data.edge_in_out_indexs,
+                           batch_data.edge_in_out_head_tail, batch_data.batch)
             loss = loss_function(output, batch_data.labels)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
-            if (i + 1) % 3000 == 0:
+            if (i + 1) % 200 == 0:
                 print(f"epoch={epoch} loss={train_loss / (i + 1)}")
 
         train_loss /= (i + 1)
@@ -136,8 +137,8 @@ def valid(model, dataloader, device):
     with torch.no_grad():
         for i, batch_data in enumerate(dataloader):
             batch_data = batch_data.to(device)
-            output = model(batch_data.x, batch_data.types, batch_data.edge_types, batch_data.edge_in_indexs,
-                           batch_data.edge_out_indexs, batch_data.edge_in_out_indexs, batch_data.edge_in_out_head_tail, batch_data.batch)
+            output = model(batch_data.x, batch_data.types, batch_data.edge_types, batch_data.edge_in_out_indexs,
+                           batch_data.edge_in_out_head_tail, batch_data.batch)
             loss = loss_function(output, batch_data.labels)
             losses.append(loss.item())
             pred = torch.argmax(output, dim=-1)
@@ -150,5 +151,5 @@ def valid(model, dataloader, device):
 
 
 if __name__ == '__main__':
-    print("start train on java250")
+    print("start training on java250")
     main()
