@@ -57,7 +57,7 @@ If you want to modify hyper-parameters such as embed_size, dim_size, learning_ra
 
 We didn't test it on other machines, so you may meet environmental problems. You can consult relevant websites or contact us. 
 
-## Reference
+## Citation
 If you use our code, please cite us.
 ```
 @inproceedings{Yang2023HeterogeneousDH,
