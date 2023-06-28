@@ -36,12 +36,9 @@ class HDHGConv(MessagePassing):
         self.num_edge_heads = num_edge_heads
         self.num_node_heads = num_node_heads
 
-        self.W_key1 = nn.Parameter(torch.Tensor(1, self.num_edge_heads, self.dim_size // self.num_edge_heads,
-                                                self.dim_size // self.num_edge_heads))
-        self.W_query1 = nn.Parameter(torch.Tensor(1, self.num_edge_heads, self.dim_size // self.num_edge_heads,
-                                                  self.dim_size // self.num_edge_heads))
-        self.W_vector1 = nn.Parameter(torch.Tensor(1, self.num_edge_heads, self.dim_size // self.num_edge_heads,
-                                                   self.dim_size // self.num_edge_heads))
+        self.Q1 = nn.Linear(self.dim_size, self.dim_size, bias=False)
+        self.K1 = nn.Linear(self.dim_size, self.dim_size, bias=False)
+        self.V1 = nn.Linear(self.dim_size, self.dim_size, bias=False)
 
         self.edge_linear = nn.Linear(self.dim_size, self.dim_size)
 
@@ -49,28 +46,14 @@ class HDHGConv(MessagePassing):
 
         self.to_head_tail_linear = HeteroLinear(self.dim_size, self.dim_size, 2)
 
-        self.W_key2 = nn.Parameter(torch.Tensor(1, self.num_node_heads, self.dim_size // self.num_node_heads,
-                                                self.dim_size // self.num_node_heads))
-        self.W_query2 = nn.Parameter(torch.Tensor(1, self.num_node_heads, self.dim_size // self.num_node_heads,
-                                                  self.dim_size // self.num_node_heads))
-        self.W_vector2 = nn.Parameter(torch.Tensor(1, self.num_node_heads, self.dim_size // self.num_node_heads,
-                                                   self.dim_size // self.num_node_heads))
+        self.Q2 = nn.Linear(self.dim_size, self.dim_size, bias=False)
+        self.K2 = nn.Linear(self.dim_size, self.dim_size, bias=False)
+        self.V2 = nn.Linear(self.dim_size, self.dim_size, bias=False)
 
         self.u1 = nn.Linear(self.dim_size, self.dim_size)
         self.u2 = nn.Linear(self.dim_size, self.dim_size)
 
         self.norm = GraphNorm(self.dim_size)
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        nn.init.xavier_uniform_(self.W_key1)
-        nn.init.xavier_uniform_(self.W_query1)
-        nn.init.xavier_uniform_(self.W_vector1)
-
-        nn.init.xavier_uniform_(self.W_key2)
-        nn.init.xavier_uniform_(self.W_query2)
-        nn.init.xavier_uniform_(self.W_vector2)
 
     def forward(self, x, edge_attr, edge_in_out_indexs, edge_in_out_head_tail, batch):
         # x [num_nodes, dim_size] edge_attr [num_edges, dim_size] edge_in_out_indexs [2, num_nodeedges] edge_in_out_head_tail [num_nodeedges]
@@ -85,20 +68,22 @@ class HDHGConv(MessagePassing):
 
     def edge_update(self, edge_index=None, x_j=None, edge_attr_i=None, edge_in_out_head_tail=None):
         m = self.head_tail_linear(x_j, edge_in_out_head_tail)
-        m = m.reshape(-1, self.num_edge_heads, 1, self.dim_size // self.num_edge_heads)
-        edge_attr_i = edge_attr_i.reshape(-1, self.num_edge_heads, 1, self.dim_size // self.num_edge_heads)
-        # m, edge_attr_j [num_nodeedges, num_edge_heads, 1, head_size]
-        query = (self.W_query1 * edge_attr_i).sum(dim=-1)
-        key = (self.W_key1 * m).sum(dim=-1)
-        vector = (self.W_vector1 * m).sum(dim=-1)
-        # query, key, vector [num_nodeedges, num_edge_heads, head_size]
+        # m, edge_attr_i [num_nodeedges, dim_size]
+        query = self.Q1(edge_attr_i)
+        key = self.K1(m)
+        value = self.V1(m)
+
+        query = query.reshape(-1, self.num_edge_heads, self.dim_size // self.num_edge_heads)
+        key = key.reshape(-1, self.num_edge_heads, self.dim_size // self.num_edge_heads)
+        value = value.reshape(-1, self.num_edge_heads, self.dim_size // self.num_edge_heads)
+        # query, key, value [num_nodeedges, num_edge_heads, head_size]
         attn = (query * key).sum(dim=-1)
         attn = attn / math.sqrt(self.dim_size // self.num_edge_heads)
         # attn [num_nodeedges, num_edge_heads]
         attn_score = softmax(attn, edge_index[1])
         attn_score = attn_score.unsqueeze(-1)
         # attn_score [num_nodeedges, num_edge_heads, 1]
-        out = vector * attn_score
+        out = value * attn_score
         # out [num_nodeedges, num_edge_heads, head_size]
         out = scatter_add(out, edge_index[1], 0)
         # out [num_edges, num_edge_heads, head_size]
@@ -108,20 +93,22 @@ class HDHGConv(MessagePassing):
 
     def message(self, edge_index=None, x_i=None, hyperedges_j=None, edge_in_out_head_tail=None):
         m = self.to_head_tail_linear(hyperedges_j, edge_in_out_head_tail)
-        m, x_i = m.reshape(-1, self.num_node_heads, 1, self.dim_size // self.num_node_heads), \
-                 x_i.reshape(-1, self.num_node_heads, 1, self.dim_size // self.num_node_heads)
-        # m, x_i [num_nodeedges, num_node_heads, 1, head_size]
-        query = (self.W_query2 * x_i).sum(dim=-1)
-        key = (self.W_key2 * m).sum(dim=-1)
-        vector = (self.W_vector2 * m).sum(dim=-1)
-        # query, key, vector [num_nodeedges, num_node_heads, head_size]
+        # m, x_i [num_nodeedges, dim_size]
+        query = self.Q2(x_i)
+        key = self.K2(m)
+        value = self.V2(m)
+
+        query = query.reshape(-1, self.num_node_heads, self.dim_size // self.num_node_heads)
+        key = key.reshape(-1, self.num_node_heads, self.dim_size // self.num_node_heads)
+        value = value.reshape(-1, self.num_node_heads, self.dim_size // self.num_node_heads)
+        # query, key, value [num_nodeedges, num_node_heads, head_size]
         attn = (query * key).sum(dim=-1)
-        # attn [num_nodeedges, num_nodes_heads]
+        # attn [num_nodeedges, num_node_heads]
         attn = attn / math.sqrt(self.dim_size // self.num_node_heads)
         attn_score = softmax(attn, edge_index[1])
         attn_score = attn_score.unsqueeze(-1)
         # attn_score [num_nodeedges, num_node_heads, 1]
-        out = vector * attn_score
+        out = value * attn_score
         # out [num_nodeedges, num_node_heads, head_size]
 
         return out
