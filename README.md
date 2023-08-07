@@ -4,7 +4,7 @@
 This is the implementation code of Heterogeneous Directed Hypergraph Neural Network (HDHGN) model in the paper [Heterogeneous Directed Hypergraph Neural Network over abstract syntax tree (AST) for Code Classification](https://arxiv.org/abs/2305.04228). Our paper is accepted by the 35th International Conference on Software Engineering and Knowledge Engineering (SEKE 2023) as a regular paper. You can use this code to reappear the results of our model in the paper.
 
 ## Requirments
-Our experiment is done in Ubuntun 18.04.6 LTS and in python 3.8. We implement our model by [pytorch 1.10](https://pytorch.org/docs/1.10/) and [torch geometric 2.1.0](https://pytorch-geometric.readthedocs.io/en/2.1.0/index.html). We train our model on a RTX 3090. The required environments are listed in requirements.txt.
+Our experiment is done in Ubuntu 18.04.6 LTS and in python 3.8. We implement our model by [pytorch 1.10](https://pytorch.org/docs/1.10/) and [torch geometric 2.1.0](https://pytorch-geometric.readthedocs.io/en/2.1.0/index.html). We train our model on a RTX 3090. The required environments are listed in requirements.txt.
 
 ## Datasets
 Our datasets Python800 and Java250 are from [Project CodeNet](https://github.com/IBM/Project_CodeNet). You can download the datasets from <https://developer.ibm.com/data/project-codenet/>. You need to download [Project_CodeNet_Python800.tar.gz](https://dax-cdn.cdn.appdomain.cloud/dax-project-codenet/1.0.0/Project_CodeNet_Python800.tar.gz) and [Project_CodeNet_Java250.tar.gz](https://dax-cdn.cdn.appdomain.cloud/dax-project-codenet/1.0.0/Project_CodeNet_Java250.tar.gz). Then you need to put them into the data directory of our project.
