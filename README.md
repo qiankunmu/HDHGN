@@ -1,7 +1,7 @@
 # Heterogeneous Directed Hypergraph Neural Network (HDHGN)
 
 ## Introduction
-This is the implementation code of Heterogeneous Directed Hypergraph Neural Network (HDHGN) model in the paper [Heterogeneous Directed Hypergraph Neural Network over abstract syntax tree (AST) for Code Classification](https://doi.org/10.18293/SEKE2023-136). Our paper is accepted by the 35th International Conference on Software Engineering and Knowledge Engineering (SEKE 2023) as a regular paper. You can use this code to reappear the results of our model in the paper.
+This is the implementation code of Heterogeneous Directed Hypergraph Neural Network (HDHGN) model in the paper [Heterogeneous Directed Hypergraph Neural Network over abstract syntax tree (AST) for Code Classification](https://doi.org/10.18293/SEKE2023-136) ([official](https://ksiresearch.org/seke/seke23paper/paper136.pdf), [arxiv](https://arxiv.org/abs/2305.04228)). Our paper is accepted by the 35th International Conference on Software Engineering and Knowledge Engineering (SEKE 2023) as a regular paper. You can use this code to reappear the results of our model in the paper.
 
 ## Requirments
 Our experiment is done in Ubuntu 18.04.6 LTS and in python 3.8. We implement our model by [pytorch 1.10](https://pytorch.org/docs/1.10/) and [torch geometric 2.1.0](https://pytorch-geometric.readthedocs.io/en/2.1.0/index.html). We train our model on a RTX 3090. The required environments are listed in requirements.txt.
@@ -64,6 +64,7 @@ If you use our code, please cite us.
   title={Heterogeneous Directed Hypergraph Neural Network over abstract syntax tree {(AST)} for Code Classification},
   author={Guang Yang and Tiancheng Jin and Liang Dou},
   booktitle={The 35th International Conference on Software Engineering and Knowledge Engineering, {SEKE} 2023},
+  pages={274--279},
   year={2023},
   doi={10.18293/SEKE2023-136}
 }
