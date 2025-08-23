@@ -7,7 +7,7 @@ This is the implementation code of Heterogeneous Directed Hypergraph Neural Netw
 Our experiment is done in Ubuntu 18.04.6 LTS and in python 3.8. We implement our model by [pytorch 1.10](https://pytorch.org/docs/1.10/) and [torch geometric 2.1.0](https://pytorch-geometric.readthedocs.io/en/2.1.0/index.html). We train our model on a RTX 3090. The required environments are listed in requirements.txt.
 
 ## Datasets
-Our datasets Python800 and Java250 are from [Project CodeNet](https://github.com/IBM/Project_CodeNet). You can download the datasets from <https://developer.ibm.com/data/project-codenet/>. You need to download [Project_CodeNet_Python800.tar.gz](https://dax-cdn.cdn.appdomain.cloud/dax-project-codenet/1.0.0/Project_CodeNet_Python800.tar.gz) and [Project_CodeNet_Java250.tar.gz](https://dax-cdn.cdn.appdomain.cloud/dax-project-codenet/1.0.0/Project_CodeNet_Java250.tar.gz). Then you need to put them into the data directory of our project.
+Our datasets Python800 and Java250 are from [Project CodeNet](https://github.com/IBM/Project_CodeNet). You can download the datasets from <https://codait-cos-dax.s3.us.cloud-object-storage.appdomain.cloud/dax-project-codenet/1.0.0/Project_CodeNet.tar.gz>. Project_CodeNet_Python800 and Project_CodeNet_Java250 are included in the full dataset. Then you need to put them into the data directory of our project.
 
 ## Usages
 You can directly run run.sh to reappear the results of our model.
